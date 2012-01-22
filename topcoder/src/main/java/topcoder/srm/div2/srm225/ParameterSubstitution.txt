@@ -1,0 +1,72 @@
+
+Problem Statement
+    
+You are working on a compiler of sorts that really just translates the user's code into another programming language which has its own compiler. You need to implement code translation for method calls in your language. The parameters passed into the method in your language will be given to you as a String[], params. You will also be given a translation descriptor, code, which tells you how to use the parameters in the code for the other language. The translation descriptor will have "$X" where X is a number between 1 and the number of parameters, inclusive, which signifies that the Xth parameter should be inserted in at that spot (1-based).
+For instance, if params is {"x", "y", "z"} and code is "($2 + $3)/$1", you should return "(y + z)/x".
+If there is ambiguity as to the number of the parameter, use the largest possible valid number less than or equal to the number of parameters - $105 would be parameter 10 followed by the character '5' if there are at least 10 parameters but less than 105 and would be parameter 1 followed by "05" if there are less than 10 parameters and at least one. Return code with all the substitutions made.
+Definition
+    
+Class:
+ParameterSubstitution
+Method:
+processParams
+Parameters:
+String, String[]
+Returns:
+String
+Method signature:
+String processParams(String code, String[] params)
+(be sure your method is public)
+    
+
+Notes
+-
+There may be other '$' symbols in the code that don't refer to parameters.
+-
+There will be no leading zeros on parameter numbers (meaning that $01 doesn't refer to parameter 1, only $1 does).
+Constraints
+-
+code will have between 0 and 50 characters, inclusive.
+-
+params will have between 0 and 50 elements, inclusive.
+-
+Each element in params will have between 0 and 50 characters, inclusive.
+-
+The characters in code and in each element of params will be between ASCII 32 and ASCII 126, inclusive.
+Examples
+0)
+
+    
+"if ($1 == $2) $3;"
+{"12", "12", "doWhatIWant()"}
+Returns: "if (12 == 12) doWhatIWant();"
+It looks like this code will do what I want.
+1)
+
+    
+"$3+$1*$2-$7=$10"
+{"myvar", "490jri", "e09jd9", "dlkjfoiej"}
+Returns: "e09jd9+myvar*490jri-$7=myvar0"
+Not every variable needs to be used, and not everything that looks like a variable is.
+2)
+
+    
+"12342123$13231232$2123211242$a$dlkj$"
+{"$2", "$1"}
+Returns: "12342123$23231232$1123211242$a$dlkj$"
+Be careful of parameter values that look like they could be other parameters.
+3)
+
+    
+"{[(+.*-,/\\:;<=>?@)]}_`~|$$1"
+{"1{[(+.*-,/\\:;<=>?@)]}_`~|"}
+Returns: "{[(+.*-,/\\:;<=>?@)]}_`~|$1{[(+.*-,/\\:;<=>?@)]}_`~|"
+Note: The '\\' in the input is really an escaped single '\'.
+4)
+
+    
+"$01"
+{"abc"}
+Returns: "$01"
+
+This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2003, TopCoder, Inc. All rights reserved.
