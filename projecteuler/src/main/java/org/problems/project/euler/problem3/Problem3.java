@@ -35,6 +35,7 @@ public class Problem3 {
 	
 	public static void main(String[] args){
 		long number= 600851475143L;
+		// some small changes
 		
 		System.out.println(calculateMaximumPrimeFactor(number));
 	}
