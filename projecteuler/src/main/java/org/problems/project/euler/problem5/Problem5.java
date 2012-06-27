@@ -9,6 +9,8 @@ package org.problems.project.euler.problem5;
  * 
  * @author marius
  * 
+ * 
+ * @see Least Common Multiple problem reference http://mathforum.org/library/drmath/view/62527.html
  */
 public class Problem5 {
 
