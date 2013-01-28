@@ -3,7 +3,11 @@ package topcoder.srm.div2.srm225;
 import org.junit.Test;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-
+/**
+ * 
+ * @author marius
+ *
+ */
 public class ParameterSubstitution {
 	public String processParams(String code, String[] params) {
 		StringBuffer solution = new StringBuffer();
