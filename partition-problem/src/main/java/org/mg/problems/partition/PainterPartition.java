@@ -53,7 +53,7 @@ public class PainterPartition {
 			m[i][0] = p[i];
 		}
 		for (int i = 0; i < k; i++) {
-			m[0][i] = 1;
+			m[0][i] = p[0];
 		}
 
 		for (int i = 1; i < n; i++) {
