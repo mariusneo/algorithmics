@@ -3,10 +3,7 @@ package org.mg.catcoder.addictivegameperformance;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Your task is to connect all pairs of points with the same color, with paths.
@@ -53,13 +50,15 @@ public class FindPath {
 
     private static Map<Integer, List<Integer>> color2CellMap = new HashMap<>();
 
+    private static int testNumber;
+
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(FindPath.class.getClassLoader()
                 .getResourceAsStream("org/mg/catcoder/addictivegameperformance/level1-2.in")));
         String line = br.readLine();
         br.close();
         String[] components = line.trim().split(" ");
-        int testNumber = Integer.parseInt(components[0]);
+        testNumber = Integer.parseInt(components[0]);
         int rows = Integer.parseInt(components[1]);
         int cols = Integer.parseInt(components[2]);
         String[][] matrix = new String[rows][cols];
@@ -302,19 +301,22 @@ public class FindPath {
     public static void validateSolution(String[][] matrix) {
         int rows = matrix.length;
         int cols = matrix[0].length;
-        System.out.println(matrixRepresentation(matrix, rows - 1, cols - 1));
 
         // matrix has been fully filled, verify whether the paths connect
         // the right dots to each other
         boolean allPathsFound = true;
-        for (Integer color : color2CellMap.keySet()) {
+        StringBuilder output = new StringBuilder();
+        output.append(testNumber);
+        output.append(" " + color2CellMap.size());
+
+        for (Integer color : new TreeSet<>(color2CellMap.keySet())) {
             List<Integer> colorCellIndexes = color2CellMap.get(color);
 
-            int cellIndex1 = colorCellIndexes.get(0);
+            int cellIndex1 = Math.min(colorCellIndexes.get(0), colorCellIndexes.get(1));
             int row1 = cellIndex1 / cols - (cellIndex1 % cols == 0 ? 1 : 0);
             int col1 = (cellIndex1 - 1) % cols;
 
-            int cellIndex2 = colorCellIndexes.get(1);
+            int cellIndex2 = Math.max(colorCellIndexes.get(0), colorCellIndexes.get(1));
             int row2 = cellIndex2 / cols - (cellIndex2 % cols == 0 ? 1 : 0);
             int col2 = (cellIndex2 - 1) % cols;
 
@@ -322,32 +324,44 @@ public class FindPath {
             // N and E have dual meaning
             int direction = 1;
 
+            output.append(" " + color);
+            output.append(" " + cellIndex1);
+
+            int lengthIndex = output.length();
+
             // find the next cell from the path next to the cell1
             if (currentRow == 0) {
                 if (currentCol == 0) {
                     if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("NW")) {
+                        output.append(" E");
                         currentCol = currentCol + 1;
                         direction = 1;
                     } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SE")) {
+                        output.append(" S");
                         currentRow = currentRow + 1;
                         direction = 1;
                     }
                 } else if (currentCol == cols - 1) {
                     if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("NE")) {
+                        output.append(" W");
                         currentCol = currentCol - 1;
                         direction = -1;
                     } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SW")) {
+                        output.append(" S");
                         currentRow = currentRow + 1;
                         direction = 1;
                     }
                 } else {
                     if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("NW")) {
+                        output.append(" E");
                         currentCol = currentCol + 1;
                         direction = 1;
                     } else if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("NE")) {
+                        output.append(" W");
                         currentCol = currentCol - 1;
                         direction = -1;
                     } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SE") || matrix[currentRow + 1][currentCol].equals("SW")) {
+                        output.append(" S");
                         currentRow = currentRow + 1;
                         direction = 1;
                     }
@@ -355,28 +369,35 @@ public class FindPath {
             } else if (currentRow == rows - 1) {
                 if (currentCol == 0) {
                     if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("SW")) {
+                        output.append(" E");
                         currentCol = currentCol + 1;
                         direction = 1;
                     } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NE")) {
+                        output.append(" S");
                         currentRow = currentRow - 1;
                         direction = -1;
                     }
                 } else if (currentCol == cols - 1) {
                     if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("SE")) {
+                        output.append(" W");
                         currentCol = currentCol - 1;
                         direction = -1;
                     } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NE")) {
+                        output.append(" S");
                         currentRow = currentRow - 1;
                         direction = -1;
                     }
                 } else {
                     if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("SW")) {
+                        output.append(" E");
                         currentCol = currentCol + 1;
                         direction = 1;
                     } else if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("SE")) {
+                        output.append(" W");
                         currentCol = currentCol - 1;
                         direction = -1;
                     } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("NE") || matrix[currentRow + 1][currentCol].equals("NW")) {
+                        output.append(" S");
                         currentRow = currentRow - 1;
                         direction = -1;
                     }
@@ -384,37 +405,47 @@ public class FindPath {
             } else {
                 if (currentCol == 0) {
                     if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("NW") || matrix[currentRow][currentCol + 1].equals("SW")) {
+                        output.append(" E");
                         currentCol = currentCol + 1;
                         direction = 1;
                     } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SE")) {
+                        output.append(" S");
                         currentRow = currentRow + 1;
                         direction = 1;
                     } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NE")) {
+                        output.append(" N");
                         currentRow = currentRow - 1;
                         direction = -1;
                     }
                 } else if (currentCol == cols - 1) {
                     if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("NE") || matrix[currentRow][currentCol - 1].equals("SE")) {
+                        output.append(" W");
                         currentCol = currentCol - 1;
                         direction = -1;
                     } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SW")) {
+                        output.append(" S");
                         currentRow = currentRow + 1;
                         direction = 1;
                     } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NW")) {
+                        output.append(" S");
                         currentRow = currentRow - 1;
                         direction = -1;
                     }
                 } else {
                     if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("NW") || matrix[currentRow][currentCol + 1].equals("SW")) {
+                        output.append(" E");
                         currentCol = currentCol + 1;
                         direction = 1;
                     } else if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("NE") || matrix[currentRow][currentCol - 1].equals("SE")) {
+                        output.append(" W");
                         currentCol = currentCol - 1;
                         direction = -1;
                     } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SE") || matrix[currentRow + 1][currentCol].equals("SW")) {
+                        output.append(" S");
                         currentRow = currentRow + 1;
                         direction = 1;
                     } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NE") || matrix[currentRow + 1][currentCol].equals("NW")) {
+                        output.append(" N");
                         currentRow = currentRow - 1;
                         direction = 1;
                     }
@@ -426,49 +457,83 @@ public class FindPath {
                 break;
             }
 
-            int previousRow = 0;
-            int previousCol = 0;
+
+            int previousRow = row1;
+            int previousCol = col1;
             while (currentRow < rows && currentCol < cols && !isColorCell(matrix[currentRow][currentCol])) {
+                int tempRow = currentRow, tempCol = currentCol;
                 switch (matrix[currentRow][currentCol]) {
                     case "N":
+                        output.append(direction == 1 ? " S" : " N");
                         currentRow += direction;
                         break;
                     case "E":
+                        output.append(direction == 1 ? " E" : " W");
                         currentCol += direction;
                         break;
                     case "NE":
-                        currentCol += direction;
+                        if (previousCol == currentCol) {
+                            currentCol += 1;
+                            output.append(" E");
+                        } else {
+                            currentRow += 1;
+                            output.append(" S");
+                        }
                         direction = 1;
                         break;
                     case "NW":
-                        currentRow += 1;
-                        direction = 1;
+                        if (previousCol == currentCol) {
+                            output.append(" N");
+                            currentCol -= 1;
+                            direction = -1;
+                        } else {
+                            output.append(" W");
+                            currentRow += 1;
+                            direction = 1;
+                        }
                         break;
                     case "SE":
-                        currentCol += 1;
-                        direction = 1;
+                        if (previousCol == currentCol) {
+                            output.append(" E");
+                            currentCol += 1;
+                            direction = 1;
+                        } else {
+                            output.append(" W");
+                            currentRow -= 1;
+                            direction = -1;
+                        }
                         break;
                     case "SW":
-
-                        currentCol -= 1;
+                        if (currentCol == previousCol) {
+                            output.append(" W");
+                            currentCol -= 1;
+                        } else {
+                            output.append(" N");
+                            currentRow -= 1;
+                        }
                         direction = -1;
                         break;
                     default:
                         break;
 
                 }
+                previousRow = tempRow;
+                previousCol = tempCol;
             }
 
             if (currentRow != row2 || currentCol != col2) {
                 allPathsFound = false;
                 break;
             }
+            output.insert(lengthIndex, " " + ((output.length() - lengthIndex) / 2));
 
         }
 
         if (allPathsFound) {
             System.out.println("SOLUTION FOUND");
             System.out.println(matrixRepresentation(matrix, rows - 1, cols - 1));
+            System.out.println(output.toString());
+
         }
     }
 
