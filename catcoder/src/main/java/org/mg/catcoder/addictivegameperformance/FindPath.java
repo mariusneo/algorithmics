@@ -54,7 +54,7 @@ public class FindPath {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(FindPath.class.getClassLoader()
-                .getResourceAsStream("org/mg/catcoder/addictivegameperformance/level1-2.in")));
+                .getResourceAsStream("org/mg/catcoder/addictivegameperformance/level1-1.in")));
         String line = br.readLine();
         br.close();
         String[] components = line.trim().split(" ");
@@ -83,6 +83,7 @@ public class FindPath {
             matrix[row][col] = Integer.toString(cellColor);
         }
 
+        System.out.println(matrixRepresentation(matrix, rows - 1, cols - 1));
         fillMatrix(matrix, 0, 0);
 
         System.out.println("DONE");
@@ -116,7 +117,9 @@ public class FindPath {
                     fillMatrix(matrix, i + 1, 0);
                 }
             } else {
-                if (!isColorCell(matrix[i][j])) {
+                if (isColorCell(matrix[i][j])) {
+                    fillMatrix(matrix, i, j + 1);
+                } else {
                     // possible directions are now : E, NE, NW
                     List<String> possibleDirections = new ArrayList<>();
 
