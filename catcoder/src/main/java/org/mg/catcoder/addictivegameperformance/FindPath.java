@@ -3,6 +3,7 @@ package org.mg.catcoder.addictivegameperformance;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,40 +51,450 @@ import java.util.Map;
  */
 public class FindPath {
 
+    private static Map<Integer, List<Integer>> color2CellMap = new HashMap<>();
+
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(FindPath.class.getClassLoader()
-                .getResourceAsStream("org/mg/catcoder/addictivegameperformance/level1-1.in")));
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] components = line.trim().split(" ");
-            int testNumber = Integer.parseInt(components[0]);
-            int rows = Integer.parseInt(components[1]);
-            int cols = Integer.parseInt(components[2]);
-            int[][] matrix = new int[rows][cols];
-            Map<Integer, List<Integer>> color2CellMap = new HashMap<>();
-            int pointsCount = Integer.parseInt(components[3]);
-            for (int i = 0; i < pointsCount; i++) {
-                int index = 4 + i * 2;
-                int cellIndex = Integer.parseInt(components[index]);
-                int cellColor = Integer.parseInt(components[index + 1]);
-
-                if (color2CellMap.containsKey(cellColor)) {
-                    color2CellMap.get(cellColor).add(cellIndex);
-                }
-
-                int row = cellIndex / cols - (cellIndex % cols == 0 ? 1 : 0);
-                int col = (cellIndex - 1) % cols;
-                matrix[row][col] = cellColor;
-            }
-
-            //TODO a naive approach would be to use the maze solving algorithm,
-            // but this algorithm does not take into account the fact that the
-            // paths between the nodes have to be disjoint.
-            // A possible solution could be by using a disjoint path algorithm
-            // (but i haven't found so far something to match the needs of this problem).
-        }
+                .getResourceAsStream("org/mg/catcoder/addictivegameperformance/level1-2.in")));
+        String line = br.readLine();
         br.close();
+        String[] components = line.trim().split(" ");
+        int testNumber = Integer.parseInt(components[0]);
+        int rows = Integer.parseInt(components[1]);
+        int cols = Integer.parseInt(components[2]);
+        String[][] matrix = new String[rows][cols];
+        List<Integer> colorCells = new ArrayList<>();
+        int pointsCount = Integer.parseInt(components[3]);
+        for (int i = 0; i < pointsCount; i++) {
+            int index = 4 + i * 2;
+            int cellIndex = Integer.parseInt(components[index]);
+            int cellColor = Integer.parseInt(components[index + 1]);
+
+            if (color2CellMap.containsKey(cellColor)) {
+                color2CellMap.get(cellColor).add(cellIndex);
+            } else {
+                List<Integer> currentColorCells = new ArrayList<>();
+                currentColorCells.add(cellIndex);
+                color2CellMap.put(cellColor, currentColorCells);
+            }
+            colorCells.add(cellIndex);
+
+            int row = cellIndex / cols - (cellIndex % cols == 0 ? 1 : 0);
+            int col = (cellIndex - 1) % cols;
+            matrix[row][col] = Integer.toString(cellColor);
+        }
+
+        fillMatrix(matrix, 0, 0);
+
+        System.out.println("DONE");
+    }
+
+    /**
+     * possible directions for the pipes are : | N, - E, :- NE, -: NW, :_ SE, _: SW
+     * find a solution where all the table is filled and the pipes do
+     * not go on top of each other
+     */
+    private static void fillMatrix(String[][] matrix, int i, int j) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        if (i == rows || i == -1) return;
+
+        if (i == 0) {
+            if (j == 0) {
+                if (!isColorCell(matrix[i][j])) {
+                    matrix[i][j] = "NE";
+                }
+                if (j == cols - 1) {
+                    fillMatrix(matrix, i + 1, 0);
+                } else {
+                    fillMatrix(matrix, i, j + 1);
+                }
+            } else if (j == cols - 1) {
+                if (!isColorCell(matrix[i][j])) {
+                    matrix[i][j] = "NW";
+                }
+                if (i < rows - 1) {
+                    fillMatrix(matrix, i + 1, 0);
+                }
+            } else {
+                if (!isColorCell(matrix[i][j])) {
+                    // possible directions are now : E, NE, NW
+                    List<String> possibleDirections = new ArrayList<>();
+
+                    if (matrix[i][j - 1].equals("NW")) {
+                        possibleDirections.add("NE");
+                    } else if (matrix[i][j - 1].equals("NE")) {
+                        possibleDirections.add("E");
+                    } else if (matrix[i][j - 1].equals("E")) {
+                        if (!isColorCell(matrix[i][j + 1])) {
+                            possibleDirections.add("NW");
+                        }
+                        possibleDirections.add("E");
+                    } else if (isColorCell(matrix[i][j - 1])) {
+                        possibleDirections.add("E");
+                    }
+                    for (String direction : possibleDirections) {
+                        matrix[i][j] = direction;
+                        fillMatrix(matrix, i, j + 1);
+                    }
+                }
+            }
+        } else if (i == rows - 1) {
+            if (j == 0) {
+                if (isColorCell(matrix[i][j])) {
+                    if (j < cols - 1) fillMatrix(matrix, i, j + 1);
+                } else {
+                    if (matrix[i - 1][j].equals("N") || matrix[i - 1][j].equals("NE") || isColorCell(matrix[i - 1][j])) {
+                        matrix[i][j] = "SE";
+                        if (j < cols - 1) fillMatrix(matrix, i, j + 1);
+                    }
+                }
+            } else if (j == cols - 1) {
+                boolean valid = false;
+                if (isColorCell(matrix[i][j])) {
+                    valid = true;
+                } else {
+                    if (matrix[i][j - 1].equals("E") || matrix[i][j - 1].equals("SE") || isColorCell(matrix[i][j - 1])) {
+                        if (matrix[i - 1][j].equals("N") || isColorCell(matrix[i - 1][j])) {
+                            valid = true;
+                            matrix[i][j] = "SW";
+                        }
+                    }
+                }
+                if (valid) {
+                    validateSolution(matrix);
+                }
+            } else {
+                if (isColorCell(matrix[i][j])) {
+                    fillMatrix(matrix, i, j + 1);
+                    fillMatrix(matrix, i, j + 1);
+                } else {
+                    // the possible directions on the last row can be : SE, E, SW
+                    if (matrix[i][j - 1].equals("SE") || matrix[i][j - 1].equals("E") || isColorCell(matrix[i][j - 1])) {
+                        if (matrix[i - 1][j].equals("N") || matrix[i - 1][j].equals("NE") || matrix[i - 1][j].equals("NW")) {
+                            matrix[i][j] = "SW";
+                            fillMatrix(matrix, i, j + 1);
+                        } else {
+                            matrix[i][j] = "E";
+                            fillMatrix(matrix, i, j + 1);
+                        }
+                    } else if (matrix[i][j - 1].equals("SW")) {
+                        if (matrix[i - 1][j].equals("N") || matrix[i - 1][j].equals("NE") || matrix[i - 1][j].equals("NW")) {
+                            matrix[i][j] = "SE";
+                            fillMatrix(matrix, i, j + 1);
+                        }
+                    }
+                }
+            }
+        } else {
+            if (j == 0) {
+                if (isColorCell(matrix[i][j])) {
+                    if (j < cols - 1) fillMatrix(matrix, i, j + 1);
+                    else fillMatrix(matrix, i + 1, 0);
+                } else {
+
+                    if (j == cols - 1) {
+                        matrix[i][j] = "N";
+                        fillMatrix(matrix, i + 1, 0);
+                    } else {
+                        if (matrix[i - 1][j].equals("N") || matrix[i - 1][j].equals("NE")) {
+                            for (String direction : new String[]{"N", "SE"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        } else if (isColorCell(matrix[i - 1][j])) {
+                            for (String direction : new String[]{"N", "SE", "NE"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        } else if (matrix[i - 1][j].equals("SE")) {
+                            matrix[i][j] = "NE";
+                            fillMatrix(matrix, i, j + 1);
+                        }
+                    }
+                }
+            } else if (j == cols - 1) {
+                if (isColorCell(matrix[i][j])) {
+                    fillMatrix(matrix, i + 1, 0);
+                } else {
+                    // possible directions on the last column : N, NW, SW
+                    if (matrix[i][j - 1].equals("E") || matrix[i][j - 1].equals("SE") || matrix[i][j - 1].equals("NE")) {
+                        if (matrix[i - 1][j].equals("N") || matrix[i - 1][j].equals("NW")) {
+                            matrix[i][j] = "SW";
+                            fillMatrix(matrix, i + 1, 0);
+                        } else if (matrix[i - 1][j].equals("SW")) {
+                            matrix[i][j] = "NW";
+                            fillMatrix(matrix, i + 1, 0);
+                        }
+                    } else if (isColorCell(matrix[i][j - 1])) {
+                        if (matrix[i - 1][j].equals("N") || isColorCell(matrix[i - 1][j])) {
+                            for (String direction : new String[]{"N", "SW"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i + 1, 0);
+                            }
+                        }
+                    } else if (matrix[i][j - 1].equals("N") || matrix[i][j - 1].equals("SW") || matrix[i][j - 1].equals("NW")) {
+                        if (matrix[i - 1][j].equals("N") || isColorCell(matrix[i - 1][j])) {
+                            matrix[i][j] = "N";
+                            fillMatrix(matrix, i + 1, 0);
+                        }
+                    }
+                }
+            } else {
+                if (isColorCell(matrix[i][j])) {
+                    fillMatrix(matrix, i, j + 1);
+                } else {
+                    // possbile directions : | N, - E, :- NE, -: NW, :_ SE, _: SW
+                    if (matrix[i][j - 1].equals("E") || matrix[i][j - 1].equals("SE") || matrix[i][j - 1].equals("NE")) {
+                        if (matrix[i - 1][j].equals("N") || matrix[i - 1][j].equals("NW") || matrix[i - 1][j].equals("NE")) {
+                            matrix[i][j] = "SW";
+                            fillMatrix(matrix, i, j + 1);
+                        } else if (matrix[i - 1][j].equals("SW") || matrix[i - 1][j].equals("SE") || matrix[i - 1][j].equals("E")) {
+                            for (String direction : new String[]{"E", "NW"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        } else if (isColorCell(matrix[i - 1][j])) {
+                            for (String direction : new String[]{"E", "NW", "SW"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        }
+                    } else if (isColorCell(matrix[i][j - 1])) {
+                        if (matrix[i - 1][j].equals("N") || matrix[i - 1][j].equals("NE") || matrix[i - 1][j].equals("NW")) {
+                            for (String direction : new String[]{"N", "SW"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        } else if (isColorCell(matrix[i - 1][j])) {
+                            for (String direction : new String[]{"N", "SW", "E"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        } else if (matrix[i - 1][j].equals("SW") || matrix[i - 1][j].equals("SE") || matrix[i - 1][j].equals("E")) {
+                            for (String direction : new String[]{"E", "NW", "NE"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        }
+                    } else if (matrix[i][j - 1].equals("N") || matrix[i][j - 1].equals("NW") || matrix[i][j - 1].equals("SW")) {
+                        if (matrix[i - 1][j].equals("N") || matrix[i - 1][j].equals("NW") || matrix[i - 1][j].equals("NE")) {
+                            for (String direction : new String[]{"N", "SE"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        } else if (isColorCell(matrix[i - 1][j])) {
+                            for (String direction : new String[]{"N", "SE", "NE"}) {
+                                matrix[i][j] = direction;
+                                fillMatrix(matrix, i, j + 1);
+                            }
+                        } else if (matrix[i - 1][j].equals("SW") || matrix[i - 1][j].equals("SE") || matrix[i - 1][j].equals("E")) {
+                            matrix[i][j] = "E";
+                            fillMatrix(matrix, i, j + 1);
+                        }
+                    }
+                }
+            }
+        }
 
     }
+
+    public static void validateSolution(String[][] matrix) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        System.out.println(matrixRepresentation(matrix, rows - 1, cols - 1));
+
+        // matrix has been fully filled, verify whether the paths connect
+        // the right dots to each other
+        boolean allPathsFound = true;
+        for (Integer color : color2CellMap.keySet()) {
+            List<Integer> colorCellIndexes = color2CellMap.get(color);
+
+            int cellIndex1 = colorCellIndexes.get(0);
+            int row1 = cellIndex1 / cols - (cellIndex1 % cols == 0 ? 1 : 0);
+            int col1 = (cellIndex1 - 1) % cols;
+
+            int cellIndex2 = colorCellIndexes.get(1);
+            int row2 = cellIndex2 / cols - (cellIndex2 % cols == 0 ? 1 : 0);
+            int col2 = (cellIndex2 - 1) % cols;
+
+            int currentRow = row1, currentCol = col1;
+            // N and E have dual meaning
+            int direction = 1;
+
+            // find the next cell from the path next to the cell1
+            if (currentRow == 0) {
+                if (currentCol == 0) {
+                    if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("NW")) {
+                        currentCol = currentCol + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SE")) {
+                        currentRow = currentRow + 1;
+                        direction = 1;
+                    }
+                } else if (currentCol == cols - 1) {
+                    if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("NE")) {
+                        currentCol = currentCol - 1;
+                        direction = -1;
+                    } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SW")) {
+                        currentRow = currentRow + 1;
+                        direction = 1;
+                    }
+                } else {
+                    if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("NW")) {
+                        currentCol = currentCol + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("NE")) {
+                        currentCol = currentCol - 1;
+                        direction = -1;
+                    } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SE") || matrix[currentRow + 1][currentCol].equals("SW")) {
+                        currentRow = currentRow + 1;
+                        direction = 1;
+                    }
+                }
+            } else if (currentRow == rows - 1) {
+                if (currentCol == 0) {
+                    if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("SW")) {
+                        currentCol = currentCol + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NE")) {
+                        currentRow = currentRow - 1;
+                        direction = -1;
+                    }
+                } else if (currentCol == cols - 1) {
+                    if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("SE")) {
+                        currentCol = currentCol - 1;
+                        direction = -1;
+                    } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NE")) {
+                        currentRow = currentRow - 1;
+                        direction = -1;
+                    }
+                } else {
+                    if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("SW")) {
+                        currentCol = currentCol + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("SE")) {
+                        currentCol = currentCol - 1;
+                        direction = -1;
+                    } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("NE") || matrix[currentRow + 1][currentCol].equals("NW")) {
+                        currentRow = currentRow - 1;
+                        direction = -1;
+                    }
+                }
+            } else {
+                if (currentCol == 0) {
+                    if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("NW") || matrix[currentRow][currentCol + 1].equals("SW")) {
+                        currentCol = currentCol + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SE")) {
+                        currentRow = currentRow + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NE")) {
+                        currentRow = currentRow - 1;
+                        direction = -1;
+                    }
+                } else if (currentCol == cols - 1) {
+                    if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("NE") || matrix[currentRow][currentCol - 1].equals("SE")) {
+                        currentCol = currentCol - 1;
+                        direction = -1;
+                    } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SW")) {
+                        currentRow = currentRow + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NW")) {
+                        currentRow = currentRow - 1;
+                        direction = -1;
+                    }
+                } else {
+                    if (matrix[currentRow][currentCol + 1].equals("E") || matrix[currentRow][currentCol + 1].equals("NW") || matrix[currentRow][currentCol + 1].equals("SW")) {
+                        currentCol = currentCol + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow][currentCol - 1].equals("E") || matrix[currentRow][currentCol - 1].equals("NE") || matrix[currentRow][currentCol - 1].equals("SE")) {
+                        currentCol = currentCol - 1;
+                        direction = -1;
+                    } else if (matrix[currentRow + 1][currentCol].equals("N") || matrix[currentRow + 1][currentCol].equals("SE") || matrix[currentRow + 1][currentCol].equals("SW")) {
+                        currentRow = currentRow + 1;
+                        direction = 1;
+                    } else if (matrix[currentRow - 1][currentCol].equals("N") || matrix[currentRow - 1][currentCol].equals("NE") || matrix[currentRow + 1][currentCol].equals("NW")) {
+                        currentRow = currentRow - 1;
+                        direction = 1;
+                    }
+                }
+            }
+
+            if (currentRow == row1 && currentCol == col1) {
+                allPathsFound = false;
+                break;
+            }
+
+            int previousRow = 0;
+            int previousCol = 0;
+            while (currentRow < rows && currentCol < cols && !isColorCell(matrix[currentRow][currentCol])) {
+                switch (matrix[currentRow][currentCol]) {
+                    case "N":
+                        currentRow += direction;
+                        break;
+                    case "E":
+                        currentCol += direction;
+                        break;
+                    case "NE":
+                        currentCol += direction;
+                        direction = 1;
+                        break;
+                    case "NW":
+                        currentRow += 1;
+                        direction = 1;
+                        break;
+                    case "SE":
+                        currentCol += 1;
+                        direction = 1;
+                        break;
+                    case "SW":
+
+                        currentCol -= 1;
+                        direction = -1;
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+
+            if (currentRow != row2 || currentCol != col2) {
+                allPathsFound = false;
+                break;
+            }
+
+        }
+
+        if (allPathsFound) {
+            System.out.println("SOLUTION FOUND");
+            System.out.println(matrixRepresentation(matrix, rows - 1, cols - 1));
+        }
+    }
+
+
+    public static String matrixRepresentation(String[][] matrix, int row, int col) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i <= row; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                if (i == row && j > col) continue;
+                sb.append(String.format("%-5s", matrix[i][j]));
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+
+    public static boolean isColorCell(String content) {
+        try {
+            Integer.parseInt(content);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
 }
