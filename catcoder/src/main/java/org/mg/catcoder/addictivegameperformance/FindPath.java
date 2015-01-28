@@ -54,7 +54,7 @@ public class FindPath {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(FindPath.class.getClassLoader()
-                .getResourceAsStream("org/mg/catcoder/addictivegameperformance/level1-1.in")));
+                .getResourceAsStream("org/mg/catcoder/addictivegameperformance/level1-2.in")));
         String line = br.readLine();
         br.close();
         String[] components = line.trim().split(" ");
@@ -168,7 +168,6 @@ public class FindPath {
                 }
             } else {
                 if (isColorCell(matrix[i][j])) {
-                    fillMatrix(matrix, i, j + 1);
                     fillMatrix(matrix, i, j + 1);
                 } else {
                     // the possible directions on the last row can be : SE, E, SW
@@ -291,7 +290,7 @@ public class FindPath {
                                 fillMatrix(matrix, i, j + 1);
                             }
                         } else if (matrix[i - 1][j].equals("SW") || matrix[i - 1][j].equals("SE") || matrix[i - 1][j].equals("E")) {
-                            matrix[i][j] = "E";
+                            matrix[i][j] = "NE";
                             fillMatrix(matrix, i, j + 1);
                         }
                     }
@@ -304,6 +303,7 @@ public class FindPath {
     public static void validateSolution(String[][] matrix) {
         int rows = matrix.length;
         int cols = matrix[0].length;
+        //System.out.println(matrixRepresentation(matrix, rows - 1, cols - 1));
 
         // matrix has been fully filled, verify whether the paths connect
         // the right dots to each other
@@ -501,7 +501,7 @@ public class FindPath {
                             currentCol += 1;
                             direction = 1;
                         } else {
-                            output.append(" W");
+                            output.append(" N");
                             currentRow -= 1;
                             direction = -1;
                         }
@@ -533,7 +533,7 @@ public class FindPath {
         }
 
         if (allPathsFound) {
-            System.out.println("SOLUTION FOUND");
+            System.out.println("SOLUTION FOUND ");
             System.out.println(matrixRepresentation(matrix, rows - 1, cols - 1));
             System.out.println(output.toString());
 
