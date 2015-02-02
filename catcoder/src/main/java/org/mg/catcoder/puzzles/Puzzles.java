@@ -416,11 +416,8 @@ public class Puzzles {
 
     public void sumSubsetsMultipleColors(int target, int elementsCount, int[] colors, List<Integer> partial,
                                          List<List<Integer>>
-            solutions) {
-        int partialSum = 0;
-        for (int i : partial) {
-            partialSum += i;
-        }
+                                                 solutions) {
+        int partialSum = partial.stream().mapToInt(Integer::intValue).sum();
 
         if (partialSum <= target) {
             if (partial.size() == elementsCount - 1) {
@@ -444,10 +441,7 @@ public class Puzzles {
 
 
     public void sumSubsets(int target, int elementsCount, List<Integer> partial, List<List<Integer>> solutions) {
-        int partialSum = 0;
-        for (int i : partial) {
-            partialSum += i;
-        }
+        int partialSum = partial.stream().mapToInt(Integer::intValue).sum();
 
         if (partialSum <= target) {
             if (partial.size() == elementsCount - 1) {
@@ -471,7 +465,7 @@ public class Puzzles {
         List<List<Integer>> solutions = new ArrayList<>();
 
         Puzzles puzzles = new Puzzles();
-        puzzles.sumSubsets(2, 3, new ArrayList<Integer>(), solutions);
+        puzzles.sumSubsets(2, 2, new ArrayList<Integer>(), solutions);
 
         for (List<Integer> solution : solutions) {
             for (int e : solution) {
