@@ -7,8 +7,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.stream.IntStream;
 
 import static java.lang.Integer.parseInt;
 
@@ -89,17 +91,17 @@ public class Puzzles {
             }
             return sb.toString();
         } else {
-            List<List<Integer>> whiteboxCombinations = new ArrayList<>();
-            sumSubsets(columns - sumBlackBlocks, blockLengths.length + 1, new ArrayList<>(), whiteboxCombinations);
+            List<int[]> whiteboxCombinations = new ArrayList<>();
+            sumSubsets(columns - sumBlackBlocks, 0, new int[blockLengths.length + 1], whiteboxCombinations);
 
             List<String> solutions = new ArrayList<>();
-            for (List<Integer> whiteBoxCombination : whiteboxCombinations) {
+            for (int[] whiteBoxCombination : whiteboxCombinations) {
                 StringBuilder arrangement = new StringBuilder();
-                for (int i = 0; i < whiteBoxCombination.size(); i++) {
-                    for (int j = 0; j < whiteBoxCombination.get(i); j++) {
+                for (int i = 0; i < whiteBoxCombination.length; i++) {
+                    for (int j = 0; j < whiteBoxCombination[i]; j++) {
                         arrangement.append("0");
                     }
-                    if (i < whiteBoxCombination.size() - 1) {
+                    if (i < whiteBoxCombination.length - 1) {
                         for (int j = 0; j < blockLengths[i]; j++) {
                             arrangement.append("1");
                         }
@@ -144,18 +146,18 @@ public class Puzzles {
             }
             return sb.toString();
         } else {
-            List<List<Integer>> whiteboxCombinations = new ArrayList<>();
-            sumSubsetsMultipleColors(columns - sumBlackBlocks, blockLengths.length + 1, colors, new ArrayList<>(),
+            List<int[]> whiteboxCombinations = new ArrayList<>();
+            sumSubsetsMultipleColors(columns - sumBlackBlocks, colors, 0, new int[blockLengths.length + 1],
                     whiteboxCombinations);
 
             List<String> solutions = new ArrayList<>();
-            for (List<Integer> whiteBoxCombination : whiteboxCombinations) {
+            for (int[] whiteBoxCombination : whiteboxCombinations) {
                 StringBuilder arrangement = new StringBuilder();
-                for (int i = 0; i < whiteBoxCombination.size(); i++) {
-                    for (int j = 0; j < whiteBoxCombination.get(i); j++) {
+                for (int i = 0; i < whiteBoxCombination.length; i++) {
+                    for (int j = 0; j < whiteBoxCombination[i]; j++) {
                         arrangement.append("0");
                     }
-                    if (i < whiteBoxCombination.size() - 1) {
+                    if (i < whiteBoxCombination.length - 1) {
                         for (int j = 0; j < blockLengths[i]; j++) {
                             arrangement.append(colors[i]);
                         }
@@ -204,18 +206,18 @@ public class Puzzles {
             }
             return sb.toString();
         } else {
-            List<List<Integer>> whiteboxCombinations = new ArrayList<>();
+            List<int[]> whiteboxCombinations = new ArrayList<>();
             sumSubsetsMultipleColorsWithPattern(columns - sumBlackBlocks, blockLengths, colors, pattern,
-                    new ArrayList<>(), whiteboxCombinations);
+                    0, new int[blockLengths.length + 1], whiteboxCombinations);
 
             List<String> solutions = new ArrayList<>();
-            for (List<Integer> whiteBoxCombination : whiteboxCombinations) {
+            for (int[] whiteBoxCombination : whiteboxCombinations) {
                 StringBuilder arrangement = new StringBuilder();
-                for (int i = 0; i < whiteBoxCombination.size(); i++) {
-                    for (int j = 0; j < whiteBoxCombination.get(i); j++) {
+                for (int i = 0; i < whiteBoxCombination.length; i++) {
+                    for (int j = 0; j < whiteBoxCombination[i]; j++) {
                         arrangement.append("0");
                     }
-                    if (i < whiteBoxCombination.size() - 1) {
+                    if (i < whiteBoxCombination.length - 1) {
                         for (int j = 0; j < blockLengths[i]; j++) {
                             arrangement.append(colors[i]);
                         }
@@ -339,14 +341,11 @@ public class Puzzles {
 
 
     public void sumSubsetsMultipleColorsWithPattern(int target, int[] blockLengths, int[] colors, String pattern,
-                                                    List<Integer> partial, List<List<Integer>> solutions) {
-        int partialSum = 0;
-        for (int i : partial) {
-            partialSum += i;
-        }
+                                                    int partialIndex, int[] partial, List<int[]> solutions) {
+        int partialSum = IntStream.range(0, partialIndex).map(i -> partial[i]).sum();
 
         if (partialSum <= target) {
-            if (partial.size() == blockLengths.length) {
+            if (partial.length == partialIndex + 1) {
                 if (target - partialSum > 0) {
                     // verify if the last empty cells to be added match the requested pattern
                     int indexInPattern = pattern.length() - (target - partialSum);
@@ -366,13 +365,13 @@ public class Puzzles {
                     if (!isValidArrangement) return;
                 }
 
-                partial.add(target - partialSum);
-                solutions.add(partial);
+                partial[partialIndex] = (target - partialSum);
+                solutions.add(Arrays.copyOf(partial, partial.length));
             } else {
                 for (int i = 0; i <= target - partialSum; i++) {
-                    if (i == 0 && partial.size() > 0) {
-                        int previousColor = colors[partial.size() - 1];
-                        int currentColor = colors[partial.size()];
+                    if (i == 0 && partialIndex > 0) {
+                        int previousColor = colors[partialIndex - 1];
+                        int currentColor = colors[partialIndex];
                         if (previousColor == currentColor) continue;
                     }
 
@@ -382,14 +381,13 @@ public class Puzzles {
                     for (int j = 0; j < i; j++) {
                         sb.append("0");
                     }
-                    int currentIndex = partial.size();
-                    for (int j = 0; j < blockLengths[currentIndex]; j++) {
-                        sb.append(colors[currentIndex]);
+                    for (int j = 0; j < blockLengths[partialIndex]; j++) {
+                        sb.append(colors[partialIndex]);
                     }
 
                     int indexInPattern = 0;
-                    for (int j = 0; j < partial.size(); j++) {
-                        indexInPattern += partial.get(j) + blockLengths[j];
+                    for (int j = 0; j < partialIndex; j++) {
+                        indexInPattern += partial[j] + blockLengths[j];
                     }
 
                     String arrangement = sb.toString();
@@ -404,56 +402,52 @@ public class Puzzles {
                     if (!isValidArrangement) continue;
 
 
-                    List<Integer> current = new ArrayList<>(partial);
-                    current.add(i);
+                    partial[partialIndex] = i;
 
-                    sumSubsetsMultipleColorsWithPattern(target, blockLengths, colors, pattern, current, solutions);
+                    sumSubsetsMultipleColorsWithPattern(target, blockLengths, colors, pattern, partialIndex + 1,
+                            partial, solutions);
                 }
             }
         }
     }
 
 
-    public void sumSubsetsMultipleColors(int target, int elementsCount, int[] colors, List<Integer> partial,
-                                         List<List<Integer>>
-                                                 solutions) {
-        int partialSum = partial.stream().mapToInt(Integer::intValue).sum();
+    public void sumSubsetsMultipleColors(int target, int[] colors, int partialIndex, int[] partial,
+                                         List<int[]> solutions) {
+        int partialSum = IntStream.range(0, partialIndex).map(i -> partial[i]).sum();
 
         if (partialSum <= target) {
-            if (partial.size() == elementsCount - 1) {
-                partial.add(target - partialSum);
-                solutions.add(partial);
+            if (partial.length == partialIndex + 1) {
+                partial[partial.length - 1] = (target - partialSum);
+                solutions.add(Arrays.copyOf(partial, partial.length));
             } else {
                 for (int i = 0; i <= target - partialSum; i++) {
-                    if (i == 0 && partial.size() > 0) {
-                        int previousColor = colors[partial.size() - 1];
-                        int currentColor = colors[partial.size()];
+                    if (i == 0 && partialIndex > 0) {
+                        int previousColor = colors[partialIndex - 1];
+                        int currentColor = colors[partialIndex];
                         if (previousColor == currentColor) continue;
                     }
-                    List<Integer> current = new ArrayList<>(partial);
-                    current.add(i);
-
-                    sumSubsetsMultipleColors(target, elementsCount, colors, current, solutions);
+                    partial[partialIndex] = i;
+                    sumSubsetsMultipleColors(target, colors, partialIndex + 1, partial, solutions);
                 }
             }
         }
     }
 
 
-    public void sumSubsets(int target, int elementsCount, List<Integer> partial, List<List<Integer>> solutions) {
-        int partialSum = partial.stream().mapToInt(Integer::intValue).sum();
+    public void sumSubsets(int target, int partialIndex, int[] partial, List<int[]> solutions) {
+        int partialSum = IntStream.range(0, partialIndex).map(i -> partial[i]).sum();
 
         if (partialSum <= target) {
-            if (partial.size() == elementsCount - 1) {
-                partial.add(target - partialSum);
-                solutions.add(partial);
+            if (partial.length == partialIndex + 1) {
+                partial[partial.length - 1] = (target - partialSum);
+                solutions.add(Arrays.copyOf(partial, partial.length));
             } else {
                 for (int i = 0; i <= target - partialSum; i++) {
-                    if (i == 0 && partial.size() > 0) continue;
-                    List<Integer> current = new ArrayList<>(partial);
-                    current.add(i);
+                    if (i == 0 && partialIndex > 0) continue;
+                    partial[partialIndex] = i;
 
-                    sumSubsets(target, elementsCount, current, solutions);
+                    sumSubsets(target, partialIndex + 1, partial, solutions);
                 }
             }
         }
@@ -462,12 +456,12 @@ public class Puzzles {
 
     @Test
     public void testSumSubsets() {
-        List<List<Integer>> solutions = new ArrayList<>();
+        List<int[]> solutions = new ArrayList<>();
 
         Puzzles puzzles = new Puzzles();
-        puzzles.sumSubsets(2, 2, new ArrayList<Integer>(), solutions);
+        puzzles.sumSubsets(2, 0, new int[2], solutions);
 
-        for (List<Integer> solution : solutions) {
+        for (int[] solution : solutions) {
             for (int e : solution) {
                 System.out.print(e + " ");
             }
@@ -477,12 +471,12 @@ public class Puzzles {
 
     @Test
     public void testSumSubsetsMultipleColors() {
-        List<List<Integer>> solutions = new ArrayList<>();
+        List<int[]> solutions = new ArrayList<>();
 
         Puzzles puzzles = new Puzzles();
-        puzzles.sumSubsetsMultipleColors(2, 3, new int[]{1, 1}, new ArrayList<Integer>(), solutions);
+        puzzles.sumSubsetsMultipleColors(2, new int[]{1, 1}, 0, new int[3], solutions);
 
-        for (List<Integer> solution : solutions) {
+        for (int[] solution : solutions) {
             for (int e : solution) {
                 System.out.print(e + " ");
             }
