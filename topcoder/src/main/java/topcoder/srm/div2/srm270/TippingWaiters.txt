@@ -1,0 +1,90 @@
+
+Problem Statement
+    
+In a restaurant, if you were pleased by the waiter's service, you may leave him a tip -- you pay him more than the actual value of the bill, and the waiter keeps the excess money. In some countries, not leaving a tip for the waiter is even considered impolite. During my recent holiday I was having dinner in a foreign restaurant. The pamphlet from my travel agency informed me that the proper way of tipping the waiter is the following:
+The sum I pay must be round, i.e., divisible by 5.
+The tip must be between 5% and 10% of the final sum I pay, inclusive.
+Clearly, sometimes there may be multiple "correct" ways of settling the bill. I'd like to know exactly how many choices I have in a given situation. I could program it easily, but I was having a holiday... and so it's you who has to solve this task. You will be given:
+an int bill -- the amount I have to pay for the dinner
+an int cash -- the amount of money I have in my pocket
+Write a function that computes how many different final sums satisfy the conditions above.
+Definition
+    
+Class:
+TippingWaiters
+Method:
+possiblePayments
+Parameters:
+int, int
+Returns:
+int
+Method signature:
+int possiblePayments(int bill, int cash)
+(be sure your method is public)
+Limits
+    
+Time limit (s):
+2.000
+Memory limit (MB):
+64
+Notes
+-
+Assume that both bill and cash are in dollars.
+-
+All the money I have is in one-dollar banknotes.
+Constraints
+-
+bill and cash are between 1 and 2,000,000,000, inclusive.
+-
+bill doesn't exceed cash.
+Examples
+0)
+
+    
+4
+100
+Returns: 0
+4 isn't a round sum, and 5 is too much.
+1)
+
+    
+23
+100
+Returns: 1
+The only correct choice is to pay 25 dollars, thus leaving a tip of 2 dollars.
+2)
+
+    
+23
+24
+Returns: 0
+The same bill, but I don't have enough money to leave an appropriate tip.
+3)
+
+    
+220
+239
+Returns: 1
+This time, it is appropriate to pay either 235 or 240 dollars. Sadly, I don't have enough money for the second possibility.
+4)
+
+    
+1234567
+12345678
+Returns: 14440
+A large bill, but with that much money I don't care.
+5)
+
+    
+1880000000
+1980000000
+Returns: 210527
+
+6)
+
+    
+171000000
+179999999
+Returns: 0
+
+This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2003, TopCoder, Inc. All rights reserved.

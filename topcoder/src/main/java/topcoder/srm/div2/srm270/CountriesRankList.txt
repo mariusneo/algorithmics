@@ -1,0 +1,78 @@
+
+Problem Statement
+    
+An unnamed international contest just finished. There were exactly four contestants from each of the participating countries. During the contest each of the contestants achieved a non-negative integer score (the higher, the better). The contestants were sorted according to their scores and the first part of the overall results (i.e., the best few contestants) was announced during the final ceremony. The organizers of the contest decided not to publish the remaining, lower part of the results.
+In the Countries Ranklist the countries are ordered (in decreasing order) by the total score of their four contestants. If two or more countries have the same score, they are tied for the best place from the corresponding interval, and the places of the lower ranked countries remain unaffected. For example, if the total scores of countries A, B, C and D are 100, 90, 90 and 80, respectively, then B and C are tied for second place, and D is fourth. For further clarification, see examples 2 and 4.
+A String[] knownResults will represent the published part of the results, with each of the elements describing one of the announced contestants. The elements have the form "COUNTRY CONTESTANT SCORE", where COUNTRY is the name of the country, CONTESTANT is the name of the contestant and SCORE is his score.
+Your task will be to compute the best and the worst possible placement in the Countries Ranklist for each of the participating countries. You shall assume that from each country at least one contestant was announced and that all contestants not in the available part of the results scored strictly less than the worst contestant in the available part of rankings. (For example, if the worst announced contestant scored 47 points, then each of the not announced contestants from each of the participating countries could have scored at most 46 points.)
+You are to return a String[] with one element for each country. The form of each element must be "COUNTRY BEST WORST", where COUNTRY is the name of the country, BEST and WORST are the best and the worst position this country could possibly have in the Countries Ranklist. Order this list so that the country names are given in alphabetical order. Note that country names are case sensitive, and that in alphabetical order all uppercase letters come before lowercase letters. The numbers BEST and WORST mustn't contain leading zeroes.
+Definition
+    
+Class:
+CountriesRanklist
+Method:
+findPlaces
+Parameters:
+String[]
+Returns:
+String[]
+Method signature:
+String[] findPlaces(String[] knownPoints)
+(be sure your method is public)
+Limits
+    
+Time limit (s):
+2.000
+Memory limit (MB):
+64
+Notes
+-
+All scores (even the unknown ones) are non-negative integers.
+Constraints
+-
+knownResults contains between 1 and 50 elements, inclusive.
+-
+Each of the elements in knownResults is of the form "COUNTRY CONTESTANT SCORE".
+-
+Each COUNTRY and CONTESTANT in knownResults are strings containing between 1 and 10 letters ('a'-'z', 'A'-'Z').
+-
+For each country knownResults contains at most 4 contestants.
+-
+Each SCORE in knownResults is an integer between 1 and 600, inclusive, with no leading zeroes.
+Examples
+0)
+
+    
+{"Poland Krzysztof 101", "Ukraine Evgeni 30", "Ukraine Ivan 24"}
+Returns: {"Poland 1 1", "Ukraine 2 2" }
+The worst announced contestant is Ivan with 24 points. Each of the contestants that weren't announced had to score strictly less, i.e., at most 23 points. Thus the total score of Ukraine is at most 30+24+23+23 = 100 and Poland surely wins.
+1)
+
+    
+{"Poland Krzysztof 100", "CzechRep Martin 30", "CzechRep Jirka 25"}
+Returns: {"CzechRep 1 2", "Poland 1 2" }
+This time, if the two missing Czech competitors scored 24 points each (and the remaining three from Poland scored 0), Czech Republic could still win. Note the order in which the countries are reported in the output.
+2)
+
+    
+{"Slovakia Marian 270", "Hungary Istvan 24", "Poland Krzysztof 100",
+ "Hungary Gyula 30", "Germany Tobias 27", "Germany Juergen 27"}
+Returns: {"Germany 2 4", "Hungary 2 4", "Poland 2 2", "Slovakia 1 1" }
+This is an interesting case. Slovakia is sure to win, and Poland is sure to be second. But it is possible that Germany, Hungary and Poland have an equal total score of 100. In this case they are all tied for second place.
+3)
+
+    
+{"usa Jack 14", "USA Jim 10", "USA Jim 10", "USA Jim 10",
+ "USA Jim 10", "usa Jack 14", "usa Jack 14", "Zimbabwe Jack 10"}
+Returns: {"USA 2 2", "Zimbabwe 3 3", "usa 1 1" }
+Case matters, "USA" and "usa" are two different countries. Contestant names don't matter, i.e., from "USA" there are four different contestants, all named "Jim".
+4)
+
+    
+{"A a 9", "A b 9", "A c 9", "A d 9",
+ "B e 9", "B f 9", "B g 8", "B h 8",
+ "C i 9", "C j 9", "C k 9", "C l 7",
+ "D m 1", "D n 1", "D o 1", "D p 1"}
+Returns: {"A 1 1", "B 2 2", "C 2 2", "D 4 4" }
+All results have been announced, so everything is clear. A is first, B and C are tied for second, and D is fourth.
+This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2003, TopCoder, Inc. All rights reserved.
