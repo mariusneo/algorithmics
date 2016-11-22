@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
  * 1. Given a brick of size 1 x 4, how many ways you can construct a wall of size N x 4
  * Let me clarify the question, as shown in figure 1 X 4 brick can be used as 4 X 1 brick also,
  * and we have a wall of N X 4 or 4 X N unit.
+ *
+ * Solution: http://algorithmsandme.in/category/interview-experiences/amazon-interview-experiences/
  */
 public class Wall {
 
